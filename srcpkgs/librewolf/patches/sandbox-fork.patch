@@ -1,0 +1,17 @@
+make SYS_fork non-fatal, musl uses it for fork(2)
+diff --git a/security/sandbox/linux/SandboxFilter.cpp b/security/sandbox/linux/SandboxFilter.cpp
+index 5f6f9bc..3360c51 100644
+--- a/security/sandbox/linux/SandboxFilter.cpp
++++ b/security/sandbox/linux/SandboxFilter.cpp
+@@ -1593,6 +1593,11 @@ class ContentSandboxPolicy : public SandboxPolicyCommon {
+       case __NR_clone:
+         return ClonePolicy(Error(EPERM));
+ 
++#  ifdef __NR_fork
++      case __NR_fork:
++        return Error(ENOSYS);
++#  endif
++
+       case __NR_clone3:
+         return Error(ENOSYS);
+ 
