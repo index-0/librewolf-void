@@ -22,7 +22,9 @@ nss_config_args="
  --includedir=${XBPS_CROSS_BASE}/usr/include/nss"
 
 ac_add_options --disable-tests
+ac_add_options --disable-bootstrap
 ac_add_options --disable-crashreporter
+ac_add_options --disable-default-browser-agent
 ac_add_options --disable-updater
 ac_add_options --disable-install-strip
 ac_add_options --disable-strip
