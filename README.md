@@ -35,9 +35,9 @@ Once the bootstrap is ready, you can build the package with:
 ```
 $ ./xbps-src pkg <pkgname>
 ```
-Note: if your computer has enough resources, the -j <n> option can be used to
+**Note**: _if your computer has enough resources, the -j \<n\> option can be used to
 speed the building process, just take into consideration that 6 GiB of memory
-is needed per job to prevent the system from hanging.
+is needed per job to prevent the system from hanging._
 
 After a while, the above step will create a binary in `hostdir/binpkgs` named
 `<pkgname>-<version>_<revision>.<arch>.xbps`.
@@ -58,7 +58,7 @@ $ ./xbps-src -m <masterdir> pkg <package>
 
 ## Installing
 
-Once the package is in `hostdir/binpkgs/` you can install it with:
+Once the package is in `hostdir/binpkgs` you can install it with:
 ```
 # xbps-install -R hostdir/binpkgs <package>
 ```
