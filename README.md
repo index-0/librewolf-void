@@ -21,17 +21,28 @@ $ cd void-packages
 $ ./xbps-src binary-bootstrap
 ```
 
+### Downloading the package
+
+```
+$ git clone https://github.com/index-0/librewolf-voidlinux.git
+```
+Once you have cloned the repository, copy the contents inside the srcpkg folder
+into the void-packages srcpkg folder.
+
 ### Building the package
 
 Once the bootstrap is ready, you can build the package with:
 ```
 $ ./xbps-src pkg <pkgname>
 ```
+Note: if your computer has enough resources, the -j <n> option can be used to
+speed the building process, just take into consideration that 6 GiB of memory
+is needed per job to prevent the system from hanging.
 
-The above step will create a binary in `hostdir/binpkgs` named
+After a while, the above step will create a binary in `hostdir/binpkgs` named
 `<pkgname>-<version>_<revision>.<arch>.xbps`.
 
-### Building for other architectures
+### Building for another architecture
 
 You must first create a new masterdir for the desired architecture:
 ```
@@ -50,15 +61,4 @@ $ ./xbps-src -m <masterdir> pkg <package>
 Once the package is in `hostdir/binpkgs/` you can install it with:
 ```
 # xbps-install -R hostdir/binpkgs <package>
-```
-
-## Releases
-If you don't feel like compiling the package yourself, I have a release page
-where I upload the xbps binaries for both x86_64 glibc and musl.
-
-For installing this way download the binary and then run:
-```
-$ cd downloads
-$ xbps-rindex -a <pkgname>-<version>_<revision>.<arch>.xbps
-# xbps-install -R $PWD <package>
 ```
