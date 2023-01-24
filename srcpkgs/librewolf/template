@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=108.0.1
+version=109.0
 revision=1
 wrksrc=${pkgname}-${version}-${revision}
 build_helper="rust"
@@ -9,7 +9,7 @@ maintainer="index <index@tfwno.gf>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${revision}/${pkgname}-${version}-${revision}.source.tar.gz"
-checksum=d1978f870ebddbcb71e92da9887e6de99818c4d8045642c46a5b3d2e2b970e81
+checksum=c549b7f6e6b407c128578b2c9c59a6ddec7bd79dc1d5563d26b9f21547c133f8
 
 lib32disabled=yes
 
@@ -106,8 +106,8 @@ do_build() {
 	export AR=llvm-ar
 	export NM=llvm-nm
 	export AS="${CC}"
-	export CFLAGS="-O2 -fno-plt"
-	export CXXFLAGS="-O2 -fno-plt"
+	export CFLAGS="-O2"
+	export CXXFLAGS="-O2"
 	export HOST_CC=clang
 	export HOST_CXX=clang++
 	export HOST_CFLAGS=""
