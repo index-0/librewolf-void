@@ -1,2 +1,2 @@
 #!/bin/sh
-exec env MOZ_ENABLE_WAYLAND=1 /usr/lib/librewolf/librewolf "$@"
+exec env GDK_BACKEND=wayland MOZ_ENABLE_WAYLAND=1 librewolf "$@"
