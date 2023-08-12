@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=116.0
+version=116.0.2
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@tfwno.gf>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=ce124c9eea7560d140a0b51a687f0f9d85db8ad95adf17c63642526544596a38
+checksum=ce8ea1a9e948fca9b22355f7e00e1db72266128667d02a5ac7ddee1c14bebfb0
 
 lib32disabled=yes
 
@@ -19,7 +19,7 @@ hostmakedepends="autoconf213 unzip zip pkg-config perl python3 yasm rust cargo
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel icu-devel
  pixman-devel libevent-devel libnotify-devel libvpx-devel libwebp-devel
  libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
- libXdamage-devel freetype-devel libatomic-devel zlib-devel
+ libXdamage-devel freetype-devel zlib-devel
  $(vopt_if alsa alsa-lib-devel) $(vopt_if dbus dbus-glib-devel)
  $(vopt_if pulseaudio pulseaudio-devel) $(vopt_if xscreensaver libXScrnSaver-devel)
  $(vopt_if sndio sndio-devel) $(vopt_if jack jack-devel)"
