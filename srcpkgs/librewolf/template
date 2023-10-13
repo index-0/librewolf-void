@@ -14,8 +14,8 @@ checksum=d972169a6b9d2e1df6a74fcf6d2e048c29e85bec3fba98cbe272e0d508fb2392
 
 lib32disabled=yes
 
-hostmakedepends="autoconf213 unzip zip pkg-config perl python3 yasm rust cargo
- llvm clang lld nodejs cbindgen nasm which tar"
+hostmakedepends="autoconf213 unzip zip pkg-config perl python3.11 yasm rust
+ cargo llvm clang lld nodejs cbindgen nasm which tar"
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel icu-devel
  pixman-devel libevent-devel libnotify-devel libvpx-devel libwebp-devel
  libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
@@ -60,6 +60,8 @@ post_patch() {
 }
 
 do_build() {
+	ln -s "/usr/bin/python3.11" "${XBPS_WRAPPERDIR}/python3"
+
 	export CC=clang
 	export CXX=clang++
 
