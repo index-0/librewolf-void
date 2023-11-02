@@ -2,7 +2,7 @@
 pkgname=librewolf
 version=119.0
 revision=1
-_rev=5
+_rev=7
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
@@ -10,7 +10,7 @@ maintainer="index <index@tfwno.gf>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=2002c2c5856b59de91d895f7e5f4997a249ba2b8d9e65b77d51a22d7d820839b
+checksum=7ede310e74321dd1139ad7855fca389946b181424d154b82f475811264a14f17
 
 lib32disabled=yes
 
