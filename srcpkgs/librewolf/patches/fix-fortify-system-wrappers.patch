@@ -1,12 +1,12 @@
 diff --git a/config/system-headers.mozbuild b/config/system-headers.mozbuild
-index 9c07dba..04ca57a 100644
+index 07d48e7f97..d2ce2b2489 100644
 --- a/config/system-headers.mozbuild
 +++ b/config/system-headers.mozbuild
-@@ -229,7 +229,6 @@ system_headers = [
-     'execinfo.h',
-     'extras.h',
-     'fcntl.h',
--    'features.h',
-     'fenv.h',
-     'ffi.h',
-     'fibdef.h',
+@@ -225,7 +225,6 @@ system_headers = [
+     "execinfo.h",
+     "extras.h",
+     "fcntl.h",
+-    "features.h",
+     "fenv.h",
+     "ffi.h",
+     "fibdef.h",
