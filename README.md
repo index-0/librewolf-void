@@ -70,3 +70,11 @@ available in the repositories. To do this run:
 ```
 $ ./xbps-src bootstrap-update
 ```
+
+# Releases
+To install a release, create an empty folder wherever you want, download the binary, and place it in the folder. Then, run the following:
+```
+$ cd <folder>
+$ xbps-rindex -a <pkgname>-<version>_<revision>.<arch>.xbps
+# xbps-install -R $PWD <package>
+```
