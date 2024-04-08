@@ -1,0 +1,71 @@
+name: build
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout librewolf-voidlinux
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: librewolf
+
+      - name: checkout void-packages
+        uses: actions/checkout@v4
+        with:
+          repository: void-linux/void-packages
+          ref: master
+          path: void-packages
+
+      - name: copying
+        run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
+
+      - name: prepare xbps-static
+        run: |
+          mkdir -p /opt/xbps
+          curl -LO http://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
+          tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
+          rm xbps-static-latest.x86_64-musl.tar.xz
+
+      - name: free space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+
+      - name: building x86_64
+        run: |
+          export PATH="/opt/xbps/usr/bin/:$PATH"
+          cd void-packages
+          ./xbps-src -m masterdir-x86_64 -A x86_64 binary-bootstrap
+          ./xbps-src pkg -j4 -m masterdir-x86_64 librewolf
+          rm -rf masterdir-x86_64
+
+      - name: building x86_64-musl
+        run: |
+          export PATH="/opt/xbps/usr/bin/:$PATH"
+          cd void-packages
+          ./xbps-src -m masterdir-x86_64-musl -A x86_64-musl binary-bootstrap
+          ./xbps-src pkg -j4 -m masterdir-x86_64-musl librewolf
+          rm -rf masterdir-x86_64-musl
+
+      - name: checksums
+        working-directory: void-packages/hostdir/binpkgs/
+        run: |
+          sha256sum $(echo librewolf-*.x86_64.xbps) | tee $(echo librewolf-*.x86_64.xbps).sha256sum
+          sha512sum $(echo librewolf-*.x86_64.xbps) | tee $(echo librewolf-*.x86_64.xbps).sha512sum
+          sha256sum $(echo librewolf-*.x86_64-musl.xbps) | tee $(echo librewolf-*.x86_64-musl.xbps).sha256sum
+          sha512sum $(echo librewolf-*.x86_64-musl.xbps) | tee $(echo librewolf-*.x86_64-musl.xbps).sha512sum
+
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: void-packages/hostdir/binpkgs/librewolf*
