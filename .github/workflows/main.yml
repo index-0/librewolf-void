@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout librewolf-voidlinux
+      - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
           ref: master

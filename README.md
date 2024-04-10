@@ -24,7 +24,7 @@ $ ./xbps-src binary-bootstrap
 ### Downloading the package
 
 ```
-$ git clone https://github.com/index-0/librewolf-voidlinux.git
+$ git clone https://github.com/index-0/librewolf-void.git
 ```
 Once you have cloned the repository, copy the contents inside the srcpkgs folder
 into the void-packages srcpkgs folder.
