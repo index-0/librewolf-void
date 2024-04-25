@@ -7,7 +7,14 @@ on:
 
 jobs:
   build:
+    strategy:
+      max-parallel: 1
+      matrix:
+        arch: [x86_64, x86_64-musl]
     runs-on: ubuntu-latest
+    env:
+      XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
+      XBPS_TARGET_ARCH: ${{ matrix.arch }}
 
     steps:
       - name: checkout librewolf-void
@@ -39,33 +46,33 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo docker image prune --all --force
 
-      - name: building x86_64
+      - name: build ${{ matrix.arch }}
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
-          ./xbps-src -m masterdir-x86_64 -A x86_64 binary-bootstrap
-          ./xbps-src pkg -j4 -m masterdir-x86_64 librewolf
-          rm -rf masterdir-x86_64
+          ./xbps-src -m masterdir-${{ matrix.arch }} -A ${{ matrix.arch }} binary-bootstrap
+          ./xbps-src pkg -j4 -m masterdir-${{ matrix.arch }} librewolf
 
-      - name: building x86_64-musl
-        run: |
-          export PATH="/opt/xbps/usr/bin/:$PATH"
-          cd void-packages
-          ./xbps-src -m masterdir-x86_64-musl -A x86_64-musl binary-bootstrap
-          ./xbps-src pkg -j4 -m masterdir-x86_64-musl librewolf
-          rm -rf masterdir-x86_64-musl
-
-      - name: checksums
+      - name: sign ${{ matrix.arch }}
         working-directory: void-packages/hostdir/binpkgs/
         run: |
-          sha256sum $(echo librewolf-*.x86_64.xbps) | tee $(echo librewolf-*.x86_64.xbps).sha256sum
-          sha512sum $(echo librewolf-*.x86_64.xbps) | tee $(echo librewolf-*.x86_64.xbps).sha512sum
-          sha256sum $(echo librewolf-*.x86_64-musl.xbps) | tee $(echo librewolf-*.x86_64-musl.xbps).sha256sum
-          sha512sum $(echo librewolf-*.x86_64-musl.xbps) | tee $(echo librewolf-*.x86_64-musl.xbps).sha512sum
+          export PATH="/opt/xbps/usr/bin/:$PATH"
+          xbps-rindex -r $PWD
+          xbps-rindex -s --signedby "index-0 <index@mailbox.org>" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD
+          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD/*.xbps
+          xbps-rindex -c $PWD
+
+      - name: checksum ${{ matrix.arch }}
+        working-directory: void-packages/hostdir/binpkgs/
+        run: |
+          sha256sum $(echo librewolf-*.${{ matrix.arch }}.xbps) | tee $(echo librewolf-*.${{ matrix.arch }}.xbps).sha256sum
+          sha512sum $(echo librewolf-*.${{ matrix.arch }}.xbps) | tee $(echo librewolf-*.${{ matrix.arch }}.xbps).sha512sum
 
       - name: release
         uses: softprops/action-gh-release@v1
         with:
-          files: void-packages/hostdir/binpkgs/librewolf*
+          files: |
+            void-packages/hostdir/binpkgs/librewolf*
+            void-packages/hostdir/binpkgs/*repodata
+
