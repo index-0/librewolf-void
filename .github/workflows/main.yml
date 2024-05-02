@@ -30,7 +30,7 @@ jobs:
           ref: master
           path: void-packages
 
-      - name: copying
+      - name: copy
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
 
       - name: prepare xbps-static
@@ -47,14 +47,14 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
 
-      - name: build ${{ matrix.arch }}
+      - name: build
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
           ./xbps-src -m masterdir-${{ matrix.arch }} -A ${{ matrix.arch }} binary-bootstrap
           ./xbps-src pkg -j4 -m masterdir-${{ matrix.arch }} librewolf
 
-      - name: sign ${{ matrix.arch }}
+      - name: sign
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
@@ -63,7 +63,7 @@ jobs:
           xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD/*.xbps
           xbps-rindex -c $PWD
 
-      - name: checksum ${{ matrix.arch }}
+      - name: checksum
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           sha256sum $(echo librewolf-*.${{ matrix.arch }}.xbps) | tee $(echo librewolf-*.${{ matrix.arch }}.xbps).sha256sum
