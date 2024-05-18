@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=125.0.3
+version=126.0
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=2b5d31508fd24470aec7a982ed0cf3f1a5f23835ef3edccc089c0cbcfca48461
+checksum=545e4d26522c4ed1a669814340dc8fee7ca8d60452a07a91f30ec28198ec072d
 
 lib32disabled=yes
 
@@ -166,7 +166,6 @@ do_build() {
 	# ac_add_options --with-wasi-sysroot=/usr/share/wasi-sysroot
 	ac_add_options --without-wasm-sandboxed-libraries
 	ac_add_options --with-mozilla-api-keyfile="${wrksrc}/mozilla-api-key"
-	#ac_add_options --enable-jxl
 	ac_add_options --enable-system-pixman
 	ac_add_options --with-system-ffi
 	ac_add_options --with-system-icu
