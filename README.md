@@ -12,6 +12,7 @@ to the repository:
 If you want to update LibreWolf along with your distribution packages, just run
 the following commands once:
 ```
+$ su
 # echo 'repository=https://github.com/index-0/librewolf-void/releases/latest/download/' > /etc/xbps.d/20-librewolf.conf
 # xbps-install -Su librewolf
 ```
