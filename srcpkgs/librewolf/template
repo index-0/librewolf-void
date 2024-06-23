@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=127.0
+version=127.0.1
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=eb7c03ad394dd8445110d718b90da6a0252c0533b8cb6ab27dd1a6e83b6853e7
+checksum=08e5fea097b028dfe0400004c891f55b46f2cd0cb08848b730611365ce511b6f
 
 lib32disabled=yes
 
