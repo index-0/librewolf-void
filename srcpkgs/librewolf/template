@@ -14,8 +14,9 @@ checksum=2090c835346ce395403007cb2d4982c12abc2e76df4bbc0083a60ae50a28c4d7
 
 lib32disabled=yes
 
+_llvmver=19
 hostmakedepends="autoconf213 unzip zip pkg-config perl python yasm rust
- cargo llvm18 clang18 lld18 nodejs cbindgen nasm which tar"
+ cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which tar"
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel icu-devel
  pixman-devel libevent-devel libnotify-devel libvpx-devel libwebp-devel
  libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
@@ -74,6 +75,8 @@ do_build() {
 		exec clang \
 			--target="${XBPS_CROSS_TRIPLET}" \
 			--sysroot="${XBPS_CROSS_BASE}" \
+			--gcc-toolchain=/usr \
+			-isystem "${XBPS_CROSS_BASE}/usr/include" \
 			"\$@"
 		!
 
@@ -82,6 +85,11 @@ do_build() {
 		exec clang++ \
 			--target="${XBPS_CROSS_TRIPLET}" \
 			--sysroot="${XBPS_CROSS_BASE}" \
+			--gcc-toolchain=/usr \
+			-isystem "${XBPS_CROSS_BASE}/usr/include/c++/${gcc_version%.*}" \
+			-isystem "${XBPS_CROSS_BASE}/usr/include/c++/${gcc_version%.*}/${XBPS_CROSS_TRIPLET}" \
+			-isystem "${XBPS_CROSS_BASE}/usr/include/c++/${gcc_version%.*}/backward" \
+			-isystem "${XBPS_CROSS_BASE}/usr/include" \
 			"\$@"
 		!
 
