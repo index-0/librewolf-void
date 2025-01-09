@@ -11,7 +11,7 @@ jobs:
       max-parallel: 1
       matrix:
         arch: [x86_64, x86_64-musl]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
       XBPS_TARGET_ARCH: ${{ matrix.arch }}
@@ -70,7 +70,7 @@ jobs:
           sha512sum $(echo librewolf-*.${{ matrix.arch }}.xbps) | tee $(echo librewolf-*.${{ matrix.arch }}.xbps).sha512sum
 
       - name: release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             void-packages/hostdir/binpkgs/librewolf*
