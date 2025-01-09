@@ -1,8 +1,8 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=133.0
+version=134.0
 revision=1
-_rev=3
+_rev=1
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
@@ -10,14 +10,14 @@ maintainer="index <index@mailbox.org>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=906ec469f7ee994d163c683601494b1a49c57df8578e14c601c56ae30528a90d
+checksum=875297fe4093a70536f4b67448682246ad6dac0bca9d9432f6cf312bdaddaeab
 
 lib32disabled=yes
 
 _llvmver=19
 hostmakedepends="autoconf213 unzip zip pkg-config perl python yasm rust
  cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which tar"
-makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel icu-devel
+makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  pixman-devel libevent-devel libnotify-devel libvpx-devel libwebp-devel
  libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
  libXdamage-devel freetype-devel zlib-devel
@@ -174,7 +174,6 @@ do_build() {
 	ac_add_options --with-mozilla-api-keyfile="${wrksrc}/mozilla-api-key"
 	ac_add_options --enable-system-pixman
 	ac_add_options --with-system-ffi
-	ac_add_options --with-system-icu
 	ac_add_options --with-system-jpeg
 	ac_add_options --with-system-libevent
 	ac_add_options --with-system-libvpx
