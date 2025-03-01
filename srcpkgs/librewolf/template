@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=135.0
+version=135.0.1
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=d195ed879a969271d0afe2d63c08805ae6e0e16af2a80841475b1d97accd331f
+checksum=8e5aefdd7007e374d8821a7100a717adce3b55da0e11492419147dc4e9242e99
 
 lib32disabled=yes
 
@@ -28,8 +28,12 @@ makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  $(vopt_if sndio sndio-devel) $(vopt_if jack jack-devel)"
 depends="nss>=3.72 nspr>=4.32 desktop-file-utils hicolor-icon-theme pciutils"
 
-build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi"
+build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi debug"
 build_options_default="alsa jack dbus pulseaudio xscreensaver sndio wayland clang wasi"
+
+if [ "$XBPS_WORDSIZE" != "32" ]; then
+	build_options_default+=" debug"
+fi
 
 desc_option_lto="Enable Link Time Optimization"
 desc_option_pgo="Enable Profile-guided Optimization"
@@ -194,6 +198,13 @@ do_build() {
 	mk_add_options MOZ_SERVICES_HEALTHREPORT=0
 	mk_add_options MOZ_TELEMETRY_REPORTING=0
 	!
+
+	# XXX: setting --enable-debug/--enable-debug-symbols explicitly
+	# seems to result in a laggy/crashy firefox.
+	if [ -z "$build_option_debug" ]; then
+		echo "ac_add_options --disable-debug-symbols" >>mozconfig
+		echo "ac_add_options --disable-debug" >>mozconfig
+	fi
 
 	# work around large debug symbols on 32-bit hosts
 	if [ "$XBPS_WORDSIZE" = "32" ]; then
