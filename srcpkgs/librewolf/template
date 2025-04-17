@@ -1,8 +1,8 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=137.0
+version=137.0.2
 revision=1
-_rev=3
+_rev=1
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=9f4a1760d7a3434645e2bd962bde7dafc0d3b0b1a500811644359cb1d613acfb
+checksum=2930c5f514c863b83b1ac83bafc928230dc95e4b55c73768e2fa18c467f94cd4
 
 lib32disabled=yes
 
