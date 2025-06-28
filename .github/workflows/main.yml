@@ -17,6 +17,13 @@ jobs:
       XBPS_TARGET_ARCH: ${{ matrix.arch }}
 
     steps:
+      - name: free space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
       - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
@@ -40,18 +47,12 @@ jobs:
           tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
           rm xbps-static-latest.x86_64-musl.tar.xz
 
-      - name: free space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-
       - name: build
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
           ./xbps-src -m masterdir-${{ matrix.arch }} -A ${{ matrix.arch }} binary-bootstrap
+          ./xbps-src -m masterdir-${{ matrix.arch }} -A ${{ matrix.arch }} bootstrap-update
           ./xbps-src pkg -j4 -m masterdir-${{ matrix.arch }} librewolf
 
       - name: sign
