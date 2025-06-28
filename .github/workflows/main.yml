@@ -66,8 +66,8 @@ jobs:
       - name: checksum
         working-directory: void-packages/hostdir/binpkgs/
         run: |
-          sha256sum $(echo librewolf-*.${{ matrix.arch }}.xbps) | tee $(echo librewolf-*.${{ matrix.arch }}.xbps).sha256sum
-          sha512sum $(echo librewolf-*.${{ matrix.arch }}.xbps) | tee $(echo librewolf-*.${{ matrix.arch }}.xbps).sha512sum
+          sha256sum $(echo librewolf-*.${{ matrix.arch }}.xbps)
+          sha512sum $(echo librewolf-*.${{ matrix.arch }}.xbps)
 
       - name: release
         uses: softprops/action-gh-release@v2
