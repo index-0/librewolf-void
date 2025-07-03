@@ -13,10 +13,16 @@ jobs:
         arch: [x86_64, x86_64-musl]
     runs-on: ubuntu-22.04
     env:
-      XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
       XBPS_TARGET_ARCH: ${{ matrix.arch }}
 
     steps:
+      - name: free space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
       - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
@@ -30,22 +36,24 @@ jobs:
           ref: master
           path: void-packages
 
-      - name: copy
+      - name: checkout xbps
+        uses: actions/checkout@v4
+        with:
+          repository: void-linux/xbps
+          ref: 0.60.3
+          path: xbps
+
+      - name: build and install xbps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-dev
+          cd xbps
+          ./configure --enable-rpath --prefix=/opt/xbps/usr
+          make -j4
+          sudo make install clean
+
+      - name: copy librewolf into srcpkgs
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
-
-      - name: prepare xbps-static
-        run: |
-          mkdir -p /opt/xbps
-          curl -LO http://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
-          tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
-          rm xbps-static-latest.x86_64-musl.tar.xz
-
-      - name: free space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
 
       - name: build
         run: |
@@ -55,6 +63,8 @@ jobs:
           ./xbps-src pkg -j4 -m masterdir-${{ matrix.arch }} librewolf
 
       - name: sign
+        env:
+          XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
@@ -75,4 +85,3 @@ jobs:
           files: |
             void-packages/hostdir/binpkgs/librewolf*
             void-packages/hostdir/binpkgs/*repodata
-
