@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=140.0.2
+version=141.0
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,12 +10,12 @@ maintainer="index <index@mailbox.org>"
 license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=8babfb102108305eaed98c49c7f97390b204b66f318ee437f41ae5b92e3f5053
+checksum=59bbd2e298e56c96dd8879df2b2220d385f40d9e49d7aa843f036e9bdff61e1f
 
 lib32disabled=yes
 
 _llvmver=19
-hostmakedepends="autoconf213 unzip zip pkg-config perl python3 yasm rust
+hostmakedepends="unzip zip pkg-config perl python3 yasm rust
  cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which
  tar xz $(vopt_if pgo 'xvfb-run dbus mesa-dri vulkan-loader pciutils')
  $(vopt_if wasi wasi-sdk)"
@@ -138,6 +138,7 @@ do_build() {
 	ac_add_options --host=${XBPS_TRIPLET}
 	ac_add_options --target=${XBPS_CROSS_TRIPLET:-${XBPS_TRIPLET}}
 	ac_add_options --enable-linker=$(vopt_if clang lld bfd)
+	ac_add_options --disable-bootstrap
 	$(vopt_if lto 'ac_add_options --enable-lto=cross')
 	$(vopt_if clang 'ac_add_options --with-libclang-path=/usr/lib')
 
@@ -146,6 +147,8 @@ do_build() {
 	ac_add_options --enable-hardening
 	ac_add_options --enable-optimize="\${CFLAGS}"
 	ac_add_options --enable-path-remapping=c,rust
+	ac_add_options --enable-packed-relative-relocs
+	ac_add_options --disable-cargo-incremental
 	ac_add_options --disable-tests
 	ac_add_options --disable-crashreporter
 	ac_add_options --disable-updater
