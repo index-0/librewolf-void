@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: void-linux/xbps
-          ref: 0.60.3
+          ref: 0.60.5
           path: xbps
 
       - name: build and install xbps
