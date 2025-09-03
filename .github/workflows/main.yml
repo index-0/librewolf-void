@@ -8,12 +8,14 @@ on:
 jobs:
   build:
     strategy:
-      max-parallel: 1
+      max-parallel: 4
       matrix:
-        arch: [x86_64, x86_64-musl]
+        include:
+          - { host: x86_64, target: x86_64 }
+          - { host: x86_64-musl, target: x86_64-musl }
+          - { host: x86_64, target: aarch64 }
+          - { host: x86_64-musl, target: aarch64-musl }
     runs-on: ubuntu-22.04
-    env:
-      XBPS_TARGET_ARCH: ${{ matrix.arch }}
 
     steps:
       - name: free space
@@ -36,52 +38,50 @@ jobs:
           ref: master
           path: void-packages
 
-      - name: checkout xbps
-        uses: actions/checkout@v4
-        with:
-          repository: void-linux/xbps
-          ref: 0.60.5
-          path: xbps
-
-      - name: build and install xbps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libarchive-dev
-          cd xbps
-          ./configure --enable-rpath --prefix=/opt/xbps/usr
-          make -j4
-          sudo make install clean
-
       - name: copy librewolf into srcpkgs
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
 
+      - name: prepare xbps-static
+        run: |
+          mkdir -p /opt/xbps
+          curl -LO http://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
+          tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
+          rm xbps-static-latest.x86_64-musl.tar.xz
+
       - name: build
+        env:
+          XBPS_TARGET_ARCH: ${{ matrix.target }}
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
-          ./xbps-src -m masterdir-${{ matrix.arch }} -A ${{ matrix.arch }} binary-bootstrap
-          ./xbps-src pkg -j4 -m masterdir-${{ matrix.arch }} librewolf
+          if [[ "${{ matrix.host }}" == "${{ matrix.target }}" ]]; then
+            ./xbps-src -A ${{ matrix.host }} binary-bootstrap
+            ./xbps-src pkg -j4 -A ${{ matrix.host }} librewolf
+          else
+            ./xbps-src -a ${{ matrix.target }} -A ${{ matrix.host }} binary-bootstrap
+            ./xbps-src pkg -j4 -a ${{ matrix.target }} -A ${{ matrix.host }} librewolf
+          fi
 
       - name: sign
         env:
           XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
+          XBPS_TARGET_ARCH: ${{ matrix.target }}
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           xbps-rindex -r $PWD
           xbps-rindex -s --signedby "index-0 <index@mailbox.org>" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD
-          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD/*.xbps
+          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") *.xbps
           xbps-rindex -c $PWD
 
       - name: checksum
         working-directory: void-packages/hostdir/binpkgs/
         run: |
-          sha256sum $(echo librewolf-*.${{ matrix.arch }}.xbps)
-          sha512sum $(echo librewolf-*.${{ matrix.arch }}.xbps)
+          sha256sum $(echo *.xbps)
+          sha512sum $(echo *.xbps)
 
       - name: release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            void-packages/hostdir/binpkgs/librewolf*
-            void-packages/hostdir/binpkgs/*repodata
+            void-packages/hostdir/binpkgs/*
