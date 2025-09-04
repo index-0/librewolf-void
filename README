@@ -12,11 +12,11 @@ the package manually each release.
 Add the repository by pasting the following into `/etc/xbps.d/20-librewolf.conf`:
 repository=https://github.com/index-0/librewolf-void/releases/latest/download/
 
-Then run:
+Lastly, install with:
 # xbps-install -Su librewolf
 
 * Manual
-Download a release into an empty folder, then run:
+Download a release (*.xbps) into an empty folder, then run:
 $ cd <folder>
 $ xbps-rindex -a librewolf-<version>_<revision>.<arch>.xbps
 # xbps-install -R $PWD librewolf
@@ -31,11 +31,11 @@ $ ./xbps-src binary-bootstrap
 Clone this repo and copy `srcpkgs/librewolf` into `void-packages/srcpkgs`, then:
 $ ./xbps-src pkg librewolf
 
-The package will be created in `hostdir/binpkgs`. Install with:
+Lastly, install with:
 # xbps-install -R hostdir/binpkgs librewolf
 
 Note:
-If your void-packages or bootstrap is stale, update first:
+If your `void-packages` or bootstrap is stale, update first:
 $ cd void-packages
 $ git pull origin master
 $ ./xbps-src bootstrap-update
