@@ -1,21 +1,21 @@
 librewolf-void
 ==============
-Void does not accept browser forks in void-packages, so this repository provides
-prebuilt packages for librewolf.
+Void does not accept browser forks in void-packages, so this repository
+provides prebuilt packages for librewolf.
 
 Installing
 ----------
-You have two options: add the repository for automatic updates, or install
-the package manually each release.
+There are two options: use the repository for automatic updates, or install
+the package manually with each release.
 
-* Repository
-Add the repository by pasting the following into `/etc/xbps.d/20-librewolf.conf`:
+* Option 1. Repository
+Create the file `/etc/xbps.d/20-librewolf.conf` with the following content:
 repository=https://github.com/index-0/librewolf-void/releases/latest/download/
 
 Lastly, install with:
 # xbps-install -Su librewolf
 
-* Manual
+* Option 2. Manual installation
 Download a release (*.xbps) into an empty folder, then run:
 $ cd <folder>
 $ xbps-rindex -a librewolf-<version>_<revision>.<arch>.xbps
@@ -28,7 +28,8 @@ $ git clone https://github.com/void-linux/void-packages
 $ cd void-packages
 $ ./xbps-src binary-bootstrap
 
-Clone this repo and copy `srcpkgs/librewolf` into `void-packages/srcpkgs`, then:
+Clone this repository and copy the `librewolf-void/srcpkgs/librewolf` folder
+into `void-packages/srcpkgs`, then run:
 $ ./xbps-src pkg librewolf
 
 Lastly, install with:
