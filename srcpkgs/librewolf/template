@@ -1,16 +1,16 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=142.0.1
+version=143.0
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
 maintainer="index <index@mailbox.org>"
-license="MPL-2.0, GPL-2.0-or-later, LGPL-2.1-or-later"
+license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=770fd784b91a836edd327e816d735a91852872909933dd8a167cd59f388ffbe1
+checksum=95e12aca5828c7e1b0b0077ad812554b1573d135264d3f17f0e5e0a1ca9270af
 
 lib32disabled=yes
 
@@ -77,8 +77,8 @@ do_build() {
 	export AS="${CC}"
 	export CFLAGS="-O2"
 	export CXXFLAGS="-O2"
-	export HOST_CFLAGS=""
-	export HOST_CXXFLAGS=""
+	unset HOST_CFLAGS
+	unset HOST_CXXFLAGS
 	export LDFLAGS="-Wl,-rpath=/usr/lib/librewolf"
 	# export LDFLAGS+="-Wl,--threads=${XBPS_MAKEJOBS}"
 
