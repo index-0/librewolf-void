@@ -40,3 +40,13 @@ If your `void-packages` or bootstrap is stale, update first:
 $ cd void-packages
 $ git pull origin master
 $ ./xbps-src bootstrap-update
+
+Integrity
+---------
+The build process is fully transparent and package integrity can be verified
+using the checksums displayed in the GitHub Actions build logs.
+
+Verify a downloaded package against the log:
+$ sha256sum librewolf-<version>_<revision>.<arch>.xbps
+
+This manual check is necessary for integrity as GitHub Releases are mutable.
