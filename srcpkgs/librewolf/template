@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=145.0.1
+version=146.0
 revision=1
 _rev=2
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.net/"
 distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=fd3b6acfbaaaf910a4804dcfb6a4ab79067efa39ec7ba09ea57517434a05113e
+checksum=244784bac847344feb091ef7605370a8267df04bf0a71a4a03f01c11b8610046
 
 lib32disabled=yes
 
@@ -281,5 +281,5 @@ do_install() {
 	# https://bugzilla.mozilla.org/show_bug.cgi?id=658850
 	ln -sf librewolf ${DESTDIR}/usr/lib/librewolf/librewolf-bin
 
-	vbin ${FILESDIR}/librewolf-wayland
+	ln -sf librewolf ${DESTDIR}/usr/bin/librewolf-wayland
 }
