@@ -9,7 +9,7 @@ short_desc="LibreWolf web browser"
 maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.net/"
-distfiles="https://gitlab.com/api/v4/projects/32320088/packages/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
+distfiles="https://codeberg.org/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
 checksum=ec53e549d9165772bec73d127564098055c414bdab05261e282bfb7d9ba1c1f5
 
 lib32disabled=yes
