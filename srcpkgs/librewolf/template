@@ -20,7 +20,7 @@ hostmakedepends="unzip zip pkg-config perl python3 yasm rust
  tar xz $(vopt_if pgo 'xvfb-run dbus mesa-dri vulkan-loader pciutils')
  $(vopt_if wasi wasi-sdk)"
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
- pixman-devel libevent-devel libnotify-devel libvpx-devel libwebp-devel
+ pixman-devel libevent-devel libnotify-devel libwebp-devel
  libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
  libXdamage-devel freetype-devel $(vopt_if wasi wasi-sdk)
  $(vopt_if alsa alsa-lib-devel) $(vopt_if dbus dbus-glib-devel)
@@ -167,7 +167,7 @@ do_build() {
 	ac_add_options --with-system-ffi
 	ac_add_options --with-system-jpeg
 	ac_add_options --with-system-libevent
-	ac_add_options --with-system-libvpx
+	# ac_add_options --with-system-libvpx
 	ac_add_options --with-system-nspr
 	ac_add_options --with-system-nss
 	ac_add_options --with-system-webp
