@@ -1,8 +1,8 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=148.0.2
+version=149.0
 revision=1
-_rev=2
+_rev=1
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
@@ -10,11 +10,11 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.net/"
 distfiles="https://codeberg.org/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=659e320b09ab5a71a05c3183e0f0592ea79d707f377fb8c301233e299183876c
+checksum=5ada766bcf505b9bea0ad473277de8680ba6801d90fb42f00f5cf84e6b410497
 
 lib32disabled=yes
 
-_llvmver=21
+_llvmver=22
 hostmakedepends="unzip zip pkg-config perl python3 yasm rust
  cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which
  tar xz $(vopt_if pgo 'xvfb-run dbus mesa-dri vulkan-loader pciutils')
