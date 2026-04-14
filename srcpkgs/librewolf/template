@@ -198,6 +198,7 @@ do_build() {
 	ac_add_options --with-l10n-base=$PWD/lw/l10n
 
 	export MOZ_REQUIRE_SIGNING=
+	export MOZILLA_OFFICIAL=1
 
 	mk_add_options MOZ_CRASHREPORTER=0
 	mk_add_options MOZ_DATA_REPORTING=0
