@@ -1,8 +1,8 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=151.0.4
+version=152.0.1
 revision=1
-_rev=1
+_rev=2
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.net/"
 distfiles="https://codeberg.org/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=c270c1ab946c71e458f41b9eb8db88b76f30b98c4b87cbd9c23cce8d91925b92
+checksum=c399f73e61158937d3484cc5d87f35c8266c3e707f1d42116650c4827bfc57cc
 
 lib32disabled=yes
 
@@ -88,10 +88,13 @@ do_build() {
 	if [ "$build_option_clang" ]; then
 		export CC=clang
 		export CXX=clang++
+		export AS=clang
 		export AR=llvm-ar
 		export NM=llvm-nm
 		export HOST_CC=clang
 		export HOST_CXX=clang++
+
+		export ASFLAGS="--target=${XBPS_CROSS_TRIPLET:-${XBPS_TRIPLET}}"
 	fi
 
 	disable_jemalloc() {
