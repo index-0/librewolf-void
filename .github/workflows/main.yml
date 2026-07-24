@@ -53,7 +53,7 @@ jobs:
       - name: prepare xbps-static
         run: |
           mkdir -p /opt/xbps
-          curl -LO http://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
+          curl -LO https://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
           tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
           rm xbps-static-latest.x86_64-musl.tar.xz
 
