@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=153.0.3
+version=153.0.4
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -9,8 +9,8 @@ short_desc="LibreWolf web browser"
 maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.net/"
-distfiles="https://codeberg.org/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=ab4283ce8eb6765e9df0f4586b2f4fb0a05de186398f2b944f6f5c791541321f
+distfiles="https://librewolf.dev/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
+checksum=2a985ec674e1472282eefc34d5334f6e711a5d9a21e76c3d50b57972f45fe45f
 
 lib32disabled=yes
 
