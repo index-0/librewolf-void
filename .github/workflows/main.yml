@@ -5,8 +5,30 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout librewolf-void
+        uses: actions/checkout@v4
+      - name: create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -n 's/^version=//p' srcpkgs/librewolf/template)
+          _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
+          : "${version:?}" "${_rev:?}"
+          gh release view "$TAG" >/dev/null 2>&1 && exit 0
+          gh release create "$TAG" \
+            --title "librewolf $TAG" \
+            --notes "https://librewolf.dev/librewolf/source/releases/tag/${version}-${_rev}" \
+            --latest=false
   build:
+    needs: release
     strategy:
       max-parallel: 4
       matrix:
@@ -16,7 +38,6 @@ jobs:
           - { host: x86_64, target: aarch64 }
           - { host: x86_64-musl, target: aarch64-musl }
     runs-on: ubuntu-22.04
-
     steps:
       - name: free space
         run: |
@@ -33,30 +54,25 @@ jobs:
           sudo rm -rf /usr/local/share/chromium
           sudo rm -rf /usr/local/lib/node_modules
           sudo docker image prune --all --force
-
       - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
           ref: master
           path: librewolf
-
       - name: checkout void-packages
         uses: actions/checkout@v4
         with:
           repository: void-linux/void-packages
           ref: master
           path: void-packages
-
       - name: copy librewolf into srcpkgs
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
-
       - name: prepare xbps-static
         run: |
           mkdir -p /opt/xbps
           curl -LO https://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
           tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
           rm xbps-static-latest.x86_64-musl.tar.xz
-
       - name: build
         env:
           XBPS_TARGET_ARCH: ${{ matrix.target }}
@@ -70,7 +86,6 @@ jobs:
             ./xbps-src -a ${{ matrix.target }} -A ${{ matrix.host }} binary-bootstrap
             ./xbps-src pkg -j4 -a ${{ matrix.target }} -A ${{ matrix.host }} librewolf
           fi
-
       - name: sign
         env:
           XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
@@ -82,15 +97,23 @@ jobs:
           xbps-rindex -s --signedby "${{ vars.SIGNEDBY }}" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD
           xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") *.xbps
           xbps-rindex -c $PWD
-
       - name: checksum
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           sha256sum $(echo *.xbps)
           sha512sum $(echo *.xbps)
-
-      - name: release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            void-packages/hostdir/binpkgs/*
+      - name: upload assets
+        working-directory: void-packages/hostdir/binpkgs/
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "${{ github.ref_name }}" *.xbps *.xbps.sig2 *-repodata --clobber
+  latest:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: mark release as latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release edit "${{ github.ref_name }}" --latest
