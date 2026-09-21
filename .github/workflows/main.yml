@@ -123,7 +123,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: void-packages/masterdir-x86_64-musl
-          key: ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template', 'void-packages/xbps-src', 'void-packages/etc/defaults.conf') }}
+          key: ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/**', 'void-packages/xbps-src', 'void-packages/etc/defaults.conf') }}
           restore-keys: |
             ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-
 
