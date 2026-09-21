@@ -33,10 +33,7 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - { host: x86_64, target: x86_64 }
           - { host: x86_64-musl, target: x86_64-musl }
-          - { host: x86_64, target: aarch64 }
-          - { host: x86_64-musl, target: aarch64-musl }
     runs-on: ubuntu-22.04
     steps:
       - name: free space
@@ -57,7 +54,7 @@ jobs:
       - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: ${{ github.sha }}
           path: librewolf
       - name: checkout void-packages
         uses: actions/checkout@v4
@@ -70,22 +67,17 @@ jobs:
       - name: prepare xbps-static
         run: |
           mkdir -p /opt/xbps
-          curl -LO https://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
-          tar xvf xbps-static-latest.x86_64-musl.tar.xz -C /opt/xbps
-          rm xbps-static-latest.x86_64-musl.tar.xz
+          curl -fL --retry 3 -o xbps-static.tar.xz https://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
+          tar xvf xbps-static.tar.xz -C /opt/xbps
+          rm xbps-static.tar.xz
       - name: build
         env:
           XBPS_TARGET_ARCH: ${{ matrix.target }}
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
-          if [[ "${{ matrix.host }}" == "${{ matrix.target }}" ]]; then
-            ./xbps-src -A ${{ matrix.host }} binary-bootstrap
-            ./xbps-src pkg -j4 -A ${{ matrix.host }} librewolf
-          else
-            ./xbps-src -a ${{ matrix.target }} -A ${{ matrix.host }} binary-bootstrap
-            ./xbps-src pkg -j4 -a ${{ matrix.target }} -A ${{ matrix.host }} librewolf
-          fi
+          ./xbps-src -A x86_64-musl binary-bootstrap
+          ./xbps-src pkg -j4 -A x86_64-musl librewolf
       - name: sign
         env:
           XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
@@ -93,21 +85,34 @@ jobs:
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
-          xbps-rindex -r $PWD
-          xbps-rindex -s --signedby "${{ vars.SIGNEDBY }}" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD
-          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") *.xbps
-          xbps-rindex -c $PWD
+          xbps-rindex -r "$PWD"
+          xbps-rindex -s --signedby "${{ vars.SIGNEDBY }}" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") "$PWD"
+          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") ./*.xbps
+          xbps-rindex -c "$PWD"
+      - name: prepare simple package name
+        working-directory: void-packages/hostdir/binpkgs/
+        run: |
+          version=$(sed -n 's/^version=//p' ../../../librewolf/srcpkgs/librewolf/template)
+          pkg=$(printf '%s\n' "librewolf-${version}_"*.xbps | head -n1)
+          : "${version:?}" "${pkg:?}"
+          cp -- "$pkg" "librewolf-${version}.xbps"
+          cp -- "${pkg}.sig2" "librewolf-${version}.xbps.sig2"
+          echo "LIBREWOLF_VERSION=${version}" >> "$GITHUB_ENV"
       - name: checksum
         working-directory: void-packages/hostdir/binpkgs/
         run: |
-          sha256sum $(echo *.xbps)
-          sha512sum $(echo *.xbps)
+          sha256sum "librewolf-${LIBREWOLF_VERSION}.xbps"
+          sha512sum "librewolf-${LIBREWOLF_VERSION}.xbps"
       - name: upload assets
         working-directory: void-packages/hostdir/binpkgs/
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release upload "${{ github.ref_name }}" *.xbps *.xbps.sig2 *-repodata --clobber
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            "librewolf-${LIBREWOLF_VERSION}.xbps" \
+            "librewolf-${LIBREWOLF_VERSION}.xbps.sig2" \
+            --clobber
   latest:
     needs: build
     runs-on: ubuntu-latest
