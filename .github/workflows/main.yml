@@ -94,10 +94,34 @@ jobs:
       - name: cache dependency sources
         uses: actions/cache@v6
         with:
-          path: void-packages/hostdir/sources
+          path: .cache/xbps-sources
           key: ${{ runner.os }}-x86_64-musl-sources-${{ steps.void_revision.outputs.sha }}
           restore-keys: |
             ${{ runner.os }}-x86_64-musl-sources-
+
+      - name: restore dependency sources
+        run: |
+          set -eu
+          mkdir -p void-packages/hostdir/sources
+          if [ -d .cache/xbps-sources ]; then
+            cp -a .cache/xbps-sources/. void-packages/hostdir/sources/
+          fi
+
+      - name: cache dependency packages
+        uses: actions/cache@v6
+        with:
+          path: .cache/xbps-binpkgs
+          key: ${{ runner.os }}-x86_64-musl-binpkgs-${{ steps.void_revision.outputs.sha }}
+          restore-keys: |
+            ${{ runner.os }}-x86_64-musl-binpkgs-
+
+      - name: restore dependency packages
+        run: |
+          set -eu
+          mkdir -p void-packages/hostdir/binpkgs
+          if [ -d .cache/xbps-binpkgs ]; then
+            cp -a .cache/xbps-binpkgs/. void-packages/hostdir/binpkgs/
+          fi
 
       - name: cache xbps build state
         uses: actions/cache@v6
@@ -175,6 +199,25 @@ jobs:
             echo "Storage OK: $((free_kb / 1024 / 1024)) GiB free."
           fi
           df -h / | tail -n 1
+
+      - name: refresh dependency caches
+        if: ${{ always() }}
+        run: |
+          set -eu
+          rm -rf .cache/xbps-sources .cache/xbps-binpkgs
+          mkdir -p .cache/xbps-sources .cache/xbps-binpkgs
+          if [ -d void-packages/hostdir/sources ]; then
+            find void-packages/hostdir/sources -maxdepth 1 -type f \
+              ! -name 'librewolf-*.source.tar.gz' \
+              -exec cp -a -- {} .cache/xbps-sources/ +
+          fi
+          if [ -d void-packages/hostdir/binpkgs ]; then
+            find void-packages/hostdir/binpkgs -maxdepth 1 -type f \
+              \( -name '*.xbps' -o -name '*.xbps.sig2' \) \
+              ! -name 'librewolf-*.xbps' \
+              ! -name 'librewolf-*.xbps.sig2' \
+              -exec cp -a -- {} .cache/xbps-binpkgs/ +
+          fi
 
       - name: sign
         if: ${{ steps.build.outcome == 'success' }}
