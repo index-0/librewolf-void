@@ -11,12 +11,12 @@ permissions:
 
 jobs:
   release:
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - name: checkout librewolf-void
         uses: actions/checkout@v4
       - name: validate release tag
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         env:
           TAG: ${{ github.ref_name }}
         run: |
@@ -29,6 +29,7 @@ jobs:
             exit 1
           }
       - name: create release
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
@@ -43,6 +44,7 @@ jobs:
             --latest=false
 
   build:
+    needs: release
     strategy:
       max-parallel: 1
       matrix:
@@ -103,6 +105,14 @@ jobs:
           key: ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template', 'void-packages/xbps-src', 'void-packages/etc/defaults.conf') }}
           restore-keys: |
             ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-
+
+      - name: cache xbps-static
+        uses: actions/cache@v4
+        with:
+          path: .cache/xbps-static.tar.xz
+          key: ${{ runner.os }}-x86_64-musl-xbps-static
+          restore-keys: |
+            ${{ runner.os }}-x86_64-musl-xbps-static
 
       - name: prepare xbps-static
         run: |
@@ -235,8 +245,8 @@ jobs:
             "librewolf-${LIBREWOLF_VERSION}.xbps.sig2" \
             --clobber
 
-      - name: cleanup release package artifacts
-        if: ${{ always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+      - name: cleanup generated package artifacts
+        if: ${{ always() }}
         run: |
           set -eu
           [ -d void-packages ] || exit 0
