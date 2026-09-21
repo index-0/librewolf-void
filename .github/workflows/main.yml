@@ -36,7 +36,7 @@ jobs:
         run: |
           version=$(sed -n 's/^version=//p' srcpkgs/librewolf/template)
           _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
-          : "${version:?}" "${_rev:?}"
+          : "${version:?}" "${revision:?}" "${pkg:?}"
           gh release view "${TAG}" >/dev/null 2>&1 && exit 0
           gh release create "${TAG}" \
             --title "librewolf ${TAG}" \
@@ -139,8 +139,9 @@ jobs:
 
           template="../librewolf/srcpkgs/librewolf/template"
           current_version=$(sed -n 's/^version=//p' "$template")
+          current_revision=$(sed -n 's/^revision=//p' "$template")
           current_source=$(sed -n 's#^distfiles=.*librewolf-\([^/]*\)\.source\.tar\.gz.*#librewolf-\1.source.tar.gz#p' "$template")
-          : "${current_version:?}" "${current_source:?}"
+          : "${current_version:?}" "${current_revision:?}" "${current_source:?}"
 
           if [ -d hostdir/sources ]; then
             find hostdir/sources -maxdepth 1 -type f \
@@ -150,7 +151,13 @@ jobs:
           fi
 
           if [ -d hostdir/binpkgs ]; then
-            find hostdir/binpkgs -maxdepth 1 -type f               \( -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' \)               ! -name "librewolf-${current_version}_*.xbps"               ! -name "librewolf-${current_version}_*.xbps.sig2"               ! -name "librewolf-${current_version}.xbps"               ! -name "librewolf-${current_version}.xbps.sig2"               -delete || true
+            find hostdir/binpkgs -maxdepth 1 -type f \
+              \( -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' \) \
+              ! -name "librewolf-${current_version}_${current_revision}.*.xbps" \
+              ! -name "librewolf-${current_version}_${current_revision}.*.xbps.sig2" \
+              ! -name "librewolf-${current_version}.xbps" \
+              ! -name "librewolf-${current_version}.xbps.sig2" \
+              -delete || true
           fi
 
           if [ -d masterdir/builddir ]; then
@@ -187,11 +194,17 @@ jobs:
         run: |
           set -eu
           version=$(sed -n 's/^version=//p' ../../../librewolf/srcpkgs/librewolf/template)
-          pkg=$(printf '%s\n' "librewolf-${version}_"*.xbps | head -n1)
-          : "${version:?}" "${pkg:?}"
+          revision=$(sed -n 's/^revision=//p' ../../../librewolf/srcpkgs/librewolf/template)
+          mapfile -t pkgs < <(find . -maxdepth 1 -type f -name "librewolf-${version}_${revision}.*.xbps" -print)
+          [ "${#pkgs[@]}" -eq 1 ] || {
+            printf 'Expected exactly one LibreWolf package for %s-%s, found %s\n' "$version" "$revision" "${#pkgs[@]}"
+            exit 1
+          }
+          pkg="${pkgs[0]}"
           cp -- "$pkg" "librewolf-${version}.xbps"
           cp -- "${pkg}.sig2" "librewolf-${version}.xbps.sig2"
           echo "LIBREWOLF_VERSION=${version}" >> "$GITHUB_ENV"
+          echo "LIBREWOLF_REVISION=${revision}" >> "$GITHUB_ENV"
 
       - name: package sanity test
         if: ${{ steps.build.outcome == 'success' }}
@@ -205,8 +218,8 @@ jobs:
           test -s "$sig"
           tar -tf "$pkg" >/dev/null
           xbps-rindex -c "$PWD"
-          generated=$(printf '%s\n' "librewolf-${LIBREWOLF_VERSION}_"*.xbps | head -n1)
-          cmp -s "$generated" "$pkg"
+          generated=$(find . -maxdepth 1 -type f -name "librewolf-${LIBREWOLF_VERSION}_${LIBREWOLF_REVISION}.*.xbps" -print -quit)
+          test -n "$generated"
           cmp -s "${generated}.sig2" "$sig"
 
       - name: checksum
