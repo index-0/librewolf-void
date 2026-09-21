@@ -1,5 +1,9 @@
 name: build
 
+concurrency:
+  group: librewolf-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:
@@ -134,6 +138,14 @@ jobs:
           rm -rf /opt/xbps/usr
           tar xvf .cache/xbps-static.tar.xz -C /opt/xbps
 
+      - name: prepare Wayland PGO compositor
+        run: |
+          set -eu
+          if ! command -v weston >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends weston
+          fi
+
       - name: build
         id: build
         env:
@@ -191,10 +203,10 @@ jobs:
           rm -rf .cache/xbps-sources .cache/xbps-binpkgs
           mkdir -p .cache/xbps-sources .cache/xbps-binpkgs
           if [ -d void-packages/hostdir/sources ]; then
-            find void-packages/hostdir/sources -maxdepth 1 -type f               ! -name 'librewolf-*.source.tar.gz'               -exec cp -a -- {} .cache/xbps-sources/ +
+            find void-packages/hostdir/sources -maxdepth 1 -type f               ! -name 'librewolf-*.source.tar.gz'               -exec cp -a -- {} .cache/xbps-sources/ \;
           fi
           if [ -d void-packages/hostdir/binpkgs ]; then
-            find void-packages/hostdir/binpkgs -maxdepth 1 -type f               \( -name '*.xbps' -o -name '*.xbps.sig2' \)               ! -name 'librewolf-*.xbps'               ! -name 'librewolf-*.xbps.sig2'               -exec cp -a -- {} .cache/xbps-binpkgs/ +
+            find void-packages/hostdir/binpkgs -maxdepth 1 -type f               \( -name '*.xbps' -o -name '*.xbps.sig2' \)               ! -name 'librewolf-*.xbps'               ! -name 'librewolf-*.xbps.sig2'               -exec cp -a -- {} .cache/xbps-binpkgs/ \;
           fi
 
       - name: sign
