@@ -229,7 +229,7 @@ do_build() {
 
 		cp mozconfig{.orig,}
 		cat <<-! >>mozconfig
-		ac_add_options --enable-lto=cross,full
+		$(vopt_if lto 'ac_add_options --enable-lto=cross,full')
 		ac_add_options --enable-profile-use=cross
 		ac_add_options --with-pgo-profile-path=${PWD@Q}/merged.profdata
 		ac_add_options --with-pgo-jarlog=${PWD@Q}/jarlog
