@@ -23,17 +23,24 @@ $ xbps-rindex -a librewolf-<version>_<revision>.<arch>.xbps
 
 Building
 --------
-Clone `void-packages` and bootstrap:
+Clone `void-packages` and bootstrap for x86_64-musl:
 $ git clone https://github.com/void-linux/void-packages
 $ cd void-packages
-$ ./xbps-src binary-bootstrap
+$ ./xbps-src -A x86_64-musl binary-bootstrap
 
 Clone this repository and copy the `librewolf-void/srcpkgs/librewolf` folder
 into `void-packages/srcpkgs`, then run:
-$ ./xbps-src pkg librewolf
+$ ./xbps-src pkg -j4 -A x86_64-musl librewolf
 
 Lastly, install with:
 # xbps-install -R hostdir/binpkgs librewolf
+
+Build target and optimization
+----------------------------
+This repository intentionally builds only `x86_64-musl`. The package is tuned
+for Intel Skylake-class CPUs, including the i3-6100U, with Clang, `-O3`,
+`-march=skylake`, `-mtune=skylake`, LTO, PGO, and single-codegen-unit Rust
+optimization. These packages are not intended for older x86-64 CPUs.
 
 Note:
 If your `void-packages` or bootstrap is stale, update first:
