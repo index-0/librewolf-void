@@ -73,6 +73,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           path: librewolf
+          persist-credentials: false
 
       - name: checkout void-packages
         uses: actions/checkout@v7
@@ -80,6 +81,7 @@ jobs:
           repository: void-linux/void-packages
           ref: master
           path: void-packages
+          persist-credentials: false
 
       - name: record void-packages revision
         id: void_revision
@@ -93,9 +95,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: void-packages/hostdir/sources
-          key: ${{ runner.os }}-x86_64-musl-sources
+          key: ${{ runner.os }}-x86_64-musl-sources-${{ steps.void_revision.outputs.sha }}
           restore-keys: |
-            ${{ runner.os }}-x86_64-musl-sources
+            ${{ runner.os }}-x86_64-musl-sources-
 
       - name: cache xbps build state
         uses: actions/cache@v6
@@ -139,8 +141,9 @@ jobs:
           template="../librewolf/srcpkgs/librewolf/template"
           current_version=$(sed -n 's/^version=//p' "$template")
           current_revision=$(sed -n 's/^revision=//p' "$template")
-          current_source="librewolf-${current_version}-${current_revision}.source.tar.gz"
-          : "${current_version:?}" "${current_revision:?}" "${current_source:?}"
+          source_revision=$(sed -n 's/^_rev=//p' "$template")
+          current_source="librewolf-${current_version}-${source_revision}.source.tar.gz"
+          : "${current_version:?}" "${current_revision:?}" "${source_revision:?}" "${current_source:?}"
 
           if [ -d hostdir/sources ]; then
             find hostdir/sources -maxdepth 1 -type f \
