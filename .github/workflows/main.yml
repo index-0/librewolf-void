@@ -138,14 +138,6 @@ jobs:
           rm -rf /opt/xbps/usr
           tar xvf .cache/xbps-static.tar.xz -C /opt/xbps
 
-      - name: prepare Wayland PGO compositor
-        run: |
-          set -eu
-          if ! command -v weston >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y --no-install-recommends weston
-          fi
-
       - name: build
         id: build
         env:
