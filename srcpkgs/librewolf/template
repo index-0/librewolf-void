@@ -146,7 +146,6 @@ do_build() {
 
 	ac_add_options --enable-application=browser
 	ac_add_options --enable-release
-	ac_add_options --enable-rust-simd
 	ac_add_options --enable-hardening
 	ac_add_options --enable-optimize="\${CFLAGS}"
 	ac_add_options --enable-path-remapping=c,rust
