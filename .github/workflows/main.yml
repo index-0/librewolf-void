@@ -85,30 +85,6 @@ jobs:
           rm -rf /opt/xbps/usr
           tar xvf .cache/xbps-static.tar.xz -C /opt/xbps
 
-      - name: storage guard before build
-        working-directory: void-packages
-        run: |
-          set -eu
-          cleanup_librewolf_sources() {
-            current_source=$(sed -n 's#^distfiles=.*librewolf-\([^/]*\)\.source\.tar\.gz.*#librewolf-\1.source.tar.gz#p' ../librewolf/srcpkgs/librewolf/template)
-            [ -n "$current_source" ] || return 0
-            find hostdir/sources -maxdepth 1 -type f -name 'librewolf-*.source.tar.gz' ! -name "$current_source" -delete
-          }
-          cleanup_old_packages() {
-            current_version=$(sed -n 's/^version=//p' ../librewolf/srcpkgs/librewolf/template)
-            find hostdir/binpkgs -maxdepth 1 -type f \
-              \( -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' \) \
-              ! -name "librewolf-$current_version.xbps" \
-              ! -name "librewolf-$current_version.xbps.sig2" -delete
-          }
-          cleanup_build_dirs() {
-            find masterdir/builddir -mindepth 1 -maxdepth 1 -type d -name 'librewolf-*' -exec rm -rf -- {} + 2>/dev/null || true
-          }
-          cleanup_librewolf_sources
-          cleanup_old_packages
-          cleanup_build_dirs
-          df -h / | tail -n 1
-
       - name: build
         env:
           XBPS_TARGET_ARCH: ${{ matrix.target }}
