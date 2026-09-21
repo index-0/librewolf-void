@@ -65,15 +65,29 @@ jobs:
           path: void-packages
       - name: copy librewolf into srcpkgs
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
+      - name: cache xbps-src state
+        uses: actions/cache@v4
+        with:
+          path: |
+            void-packages/hostdir
+            void-packages/masterdir-x86_64-musl
+            .cache/xbps-static.tar.xz
+          key: ${{ runner.os }}-x86_64-musl-xbps-src-${{ hashFiles('librewolf/srcpkgs/librewolf/template', 'void-packages/xbps-src', 'void-packages/etc/defaults.conf') }}
+          restore-keys: |
+            ${{ runner.os }}-x86_64-musl-xbps-src-
+
       - name: prepare xbps-static
         run: |
-          mkdir -p /opt/xbps
-          curl -fL --retry 3 -o xbps-static.tar.xz https://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
-          tar xvf xbps-static.tar.xz -C /opt/xbps
-          rm xbps-static.tar.xz
+          mkdir -p .cache /opt/xbps
+          if [ ! -s .cache/xbps-static.tar.xz ]; then
+            curl -fL --retry 3 -o .cache/xbps-static.tar.xz https://repo-default.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz
+          fi
+          rm -rf /opt/xbps/usr
+          tar xvf .cache/xbps-static.tar.xz -C /opt/xbps
       - name: build
         env:
           XBPS_TARGET_ARCH: ${{ matrix.target }}
+          XBPS_TARGET_MACHINE: x86_64-musl
         run: |
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
