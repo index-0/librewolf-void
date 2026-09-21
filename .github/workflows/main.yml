@@ -125,6 +125,7 @@ jobs:
           export PATH="/opt/xbps/usr/bin/:$PATH"
           cd void-packages
           ./xbps-src -A x86_64-musl binary-bootstrap
+          ./xbps-src -A x86_64-musl bootstrap-update
           ./xbps-src pkg -j4 -A x86_64-musl librewolf
 
       - name: storage guard after build
@@ -245,7 +246,9 @@ jobs:
           [ -d void-packages ] || exit 0
           cd void-packages
           if [ -d hostdir/binpkgs ]; then
-            find hostdir/binpkgs -maxdepth 1 -type f               \( -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' \)               -delete || true
+            find hostdir/binpkgs -maxdepth 1 -type f \
+              \( -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' \) \
+              -delete || true
           fi
           if [ -d masterdir/builddir ]; then
             find masterdir/builddir -mindepth 1 -maxdepth 1 -type d \
