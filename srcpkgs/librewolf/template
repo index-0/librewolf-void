@@ -17,7 +17,7 @@ lib32disabled=yes
 _llvmver=22
 hostmakedepends="unzip zip pkg-config perl python3 yasm rust
  cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which
- tar xz $(vopt_if pgo 'dbus mesa-dri vulkan-loader pciutils weston')
+ tar xz $(vopt_if pgo 'dbus')
  $(vopt_if wasi wasi-sdk)"
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  pixman-devel libevent-devel libnotify-devel libwebp-devel
@@ -215,31 +215,14 @@ do_build() {
 		./mach build
 		./mach package
 
-		wayland_runtime="$(mktemp -d "${wrksrc}/wayland-runtime-XXXXXX")"
-		chmod 700 "$wayland_runtime"
-		export XDG_RUNTIME_DIR="$wayland_runtime"
-		export WAYLAND_DISPLAY=wayland-0
-		weston --backend=headless-backend.so --use-pixman --idle-time=0 --socket="$WAYLAND_DISPLAY" >"$PWD/weston.log" 2>&1 &
-		weston_pid=$!
-		cleanup_weston() {
-			kill "$weston_pid" 2>/dev/null || true
-			wait "$weston_pid" 2>/dev/null || true
-			rm -rf "$wayland_runtime"
-		}
-		trap cleanup_weston EXIT INT TERM
-		for _ in $(seq 1 60); do
-			[ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ] && break
-			sleep 1
-		done
-		test -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
-
+		MOZ_HEADLESS=1 \
+		MOZ_HEADLESS_WIDTH=1280 \
+		MOZ_HEADLESS_HEIGHT=720 \
 		LLVM_PROFDATA=llvm-profdata \
 		JARLOG_FILE="$PWD/jarlog" \
-		GDK_BACKEND=wayland \
-		GDK_BACKEND=wayland \
-		MOZ_ENABLE_WAYLAND=1 \
-		LD_LIBRARY_PATH="$PWD/obj/dist/librewolf:$PWD/obj/dist/bin" \
+		LD_LIBRARY_PATH="$PWD/obj/dist/librewolf" \
 		dbus-run-session -- ./mach python build/pgo/profileserver.py
+		test -s merged.profdata
 		test -s jarlog
 
 		./mach clobber objdir
