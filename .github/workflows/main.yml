@@ -84,13 +84,14 @@ jobs:
       - name: copy librewolf into srcpkgs
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
 
-      - name: cache dependency sources
+      - name: cache xbps source state
         uses: actions/cache@v4
         with:
-          path: void-packages/hostdir/sources
-          key: ${{ runner.os }}-x86_64-musl-sources
+          path: void-packages/hostdir
+          key: ${{ runner.os }}-x86_64-musl-hostdir-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template') }}
           restore-keys: |
-            ${{ runner.os }}-x86_64-musl-sources
+            ${{ runner.os }}-x86_64-musl-hostdir-${{ steps.void_revision.outputs.sha }}-
+            ${{ runner.os }}-x86_64-musl-hostdir-
 
       - name: cache xbps build state
         uses: actions/cache@v4
@@ -99,14 +100,6 @@ jobs:
           key: ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template', 'void-packages/xbps-src', 'void-packages/etc/defaults.conf') }}
           restore-keys: |
             ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-
-
-      - name: cache xbps-static
-        uses: actions/cache@v4
-        with:
-          path: .cache/xbps-static.tar.xz
-          key: ${{ runner.os }}-x86_64-musl-xbps-static
-          restore-keys: |
-            ${{ runner.os }}-x86_64-musl-xbps-static
 
       - name: prepare xbps-static
         run: |
@@ -130,11 +123,12 @@ jobs:
 
       - name: storage guard after build
         if: ${{ always() }}
-        working-directory: void-packages
         env:
           MIN_FREE_GB: 2
         run: |
           set -eu
+          [ -d void-packages ] || exit 0
+          cd void-packages
 
           template="../librewolf/srcpkgs/librewolf/template"
           current_version=$(sed -n 's/^version=//p' "$template")
@@ -211,6 +205,15 @@ jobs:
           sha256sum "librewolf-${LIBREWOLF_VERSION}.xbps"
           sha512sum "librewolf-${LIBREWOLF_VERSION}.xbps"
 
+      - name: validate upload tag
+        if: ${{ success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          set -eu
+          version=$(sed -n 's/^version=//p' librewolf/srcpkgs/librewolf/template)
+          _rev=$(sed -n 's/^_rev=//p' librewolf/srcpkgs/librewolf/template)
+          expected="${version}-${_rev}"
+          [ "${GITHUB_REF_NAME}" = "${expected}" ]
+
       - name: upload assets
         if: ${{ success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         working-directory: void-packages/hostdir/binpkgs/
@@ -223,23 +226,20 @@ jobs:
 
       - name: cleanup release package artifacts
         if: ${{ always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
-        working-directory: void-packages
         run: |
           set -eu
-          version=$(sed -n 's/^version=//p' ../librewolf/srcpkgs/librewolf/template)
+          [ -d void-packages ] || exit 0
+          cd void-packages
           if [ -d hostdir/binpkgs ]; then
-            find hostdir/binpkgs -maxdepth 1 -type f               -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' | while IFS= read -r file; do
-              rm -f -- "$file"
-            done
+            find hostdir/binpkgs -maxdepth 1 -type f               \( -name 'librewolf-*.xbps' -o -name 'librewolf-*.xbps.sig2' \)               -delete || true
           fi
-          rm -f -- "hostdir/binpkgs/librewolf-${version}.xbps"             "hostdir/binpkgs/librewolf-${version}.xbps.sig2"
           if [ -d masterdir/builddir ]; then
             find masterdir/builddir -mindepth 1 -maxdepth 1 -type d               -name 'librewolf-*' -exec rm -rf -- {} + 2>/dev/null || true
           fi
           df -h / | tail -n 1
   latest:
-    needs: build
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+    needs: [release, build]
+    if: ${{ success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - name: mark release as latest
