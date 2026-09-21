@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout librewolf-void
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: validate release tag
         if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         env:
@@ -69,13 +69,13 @@ jobs:
           sudo docker image prune --all --force
 
       - name: checkout librewolf-void
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           path: librewolf
 
       - name: checkout void-packages
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: void-linux/void-packages
           ref: master
@@ -90,7 +90,7 @@ jobs:
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
 
       - name: cache xbps source state
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: void-packages/hostdir
           key: ${{ runner.os }}-x86_64-musl-hostdir-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template') }}
@@ -99,7 +99,7 @@ jobs:
             ${{ runner.os }}-x86_64-musl-hostdir-
 
       - name: cache xbps build state
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: void-packages/masterdir-x86_64-musl
           key: ${{ runner.os }}-x86_64-musl-build-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template', 'void-packages/xbps-src', 'void-packages/etc/defaults.conf') }}
