@@ -17,19 +17,19 @@ lib32disabled=yes
 _llvmver=22
 hostmakedepends="unzip zip pkg-config perl python3 yasm rust
  cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which
- tar xz $(vopt_if pgo 'xvfb-run dbus mesa-dri vulkan-loader pciutils')
+ tar xz $(vopt_if pgo 'dbus mesa-dri vulkan-loader pciutils')
  $(vopt_if wasi wasi-sdk)"
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  pixman-devel libevent-devel libnotify-devel libwebp-devel
- libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
- libXdamage-devel freetype-devel $(vopt_if wasi wasi-sdk)
+ rust-std
+ freetype-devel wayland-devel libxkbcommon-devel $(vopt_if wasi wasi-sdk)
  $(vopt_if alsa alsa-lib-devel) $(vopt_if dbus dbus-glib-devel)
- $(vopt_if pulseaudio pulseaudio-devel) $(vopt_if xscreensaver libXScrnSaver-devel)
+ $(vopt_if pulseaudio pulseaudio-devel)
  $(vopt_if sndio sndio-devel) $(vopt_if jack jack-devel)"
 depends="nss>=3.126.1 nspr>=4.32 desktop-file-utils hicolor-icon-theme pciutils"
 
-build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi"
-build_options_default="alsa dbus pulseaudio wayland lto pgo clang wasi"
+build_options="alsa jack dbus pulseaudio sndio lto pgo clang wasi"
+build_options_default="alsa dbus pulseaudio lto pgo clang wasi"
 
 desc_option_lto="Enable Link Time Optimization"
 desc_option_pgo="Enable Profile-guided Optimization"
@@ -164,7 +164,7 @@ do_build() {
 	ac_add_options $(vopt_enable jack)
 	ac_add_options $(vopt_enable pulseaudio)
 	ac_add_options $(vopt_enable sndio)
-	ac_add_options --enable-default-toolkit=$(vopt_if wayland 'cairo-gtk3-wayland' 'cairo-gtk3')
+	ac_add_options --enable-default-toolkit=cairo-gtk3-wayland-only
 
 	mk_add_options MOZ_OBJDIR="${wrksrc}/obj"
 
@@ -216,11 +216,10 @@ do_build() {
 		./mach package
 		LLVM_PROFDATA=llvm-profdata \
 		JARLOG_FILE="$PWD/jarlog" \
-		GDK_BACKEND=x11 \
-		LD_LIBRARY_PATH="$PWD/obj/dist/firefox" \
+		GDK_BACKEND=wayland \
+		MOZ_ENABLE_WAYLAND=1 \
+		LD_LIBRARY_PATH="$PWD/obj/dist/librewolf:$PWD/obj/dist/bin" \
 		XDG_RUNTIME_DIR="$(mktemp -d "${wrksrc}/pgo-runtime-XXXXXX")" \
-		MOZ_ENABLE_WAYLAND=0 \
-		xvfb-run -s "-screen 0 1920x1080x24 -nolisten local" \
 		dbus-run-session -- ./mach python build/pgo/profileserver.py
 
 		test -s merged.profdata
