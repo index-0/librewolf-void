@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=155.0.1
+version=156.0
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.dev"
 distfiles="https://librewolf.dev/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=824b084991313f6a980ff64d7af14fd67357fd3f15a7ad338d0cca87c5133208
+checksum=3379dabbd1b9b2f74db846ac62f49b0e52529ddd4f3dbfd50de088abcb47e951
 
 lib32disabled=yes
 
@@ -28,12 +28,8 @@ makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  $(vopt_if sndio sndio-devel) $(vopt_if jack jack-devel)"
 depends="nss>=3.126.1 nspr>=4.32 desktop-file-utils hicolor-icon-theme pciutils"
 
-build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi debug"
-build_options_default="alsa jack dbus pulseaudio xscreensaver sndio wayland clang wasi"
-
-if [ "$XBPS_WORDSIZE" != "32" ]; then
-	build_options_default+=" debug"
-fi
+build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi"
+build_options_default="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi"
 
 desc_option_lto="Enable Link Time Optimization"
 desc_option_pgo="Enable Profile-guided Optimization"
@@ -41,9 +37,8 @@ desc_option_clang="Build with clang"
 desc_option_wasi="Build wasm sandboxed libraries"
 
 case $XBPS_TARGET_MACHINE in
-	armv[56]*) broken="required NEON extensions are not supported on armv6" ;;
-	ppc64*) ;;
-	ppc*) broken="xptcall bitrot" ;;
+	x86_64-musl) ;;
+	*) broken="this package is intentionally built only for x86_64-musl" ;;
 esac
 
 if [ "$CROSS_BUILD" -a "$build_option_pgo" ]; then
@@ -78,8 +73,9 @@ post_patch() {
 
 do_build() {
 	export AS="${CC}"
-	export CFLAGS="-O2"
-	export CXXFLAGS="-O2"
+	export CFLAGS="-O3 -march=skylake -mtune=skylake -pipe"
+	export CXXFLAGS="-O3 -march=skylake -mtune=skylake -pipe"
+	export RUSTFLAGS="-C opt-level=3 -C target-cpu=skylake -C codegen-units=1"
 	unset HOST_CFLAGS
 	unset HOST_CXXFLAGS
 	export LDFLAGS="-Wl,-rpath=/usr/lib/librewolf"
@@ -150,6 +146,7 @@ do_build() {
 
 	ac_add_options --enable-application=browser
 	ac_add_options --enable-release
+	ac_add_options --enable-rust-simd
 	ac_add_options --enable-hardening
 	ac_add_options --enable-optimize="\${CFLAGS}"
 	ac_add_options --enable-path-remapping=c,rust
