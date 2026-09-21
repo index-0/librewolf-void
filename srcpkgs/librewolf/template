@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.dev"
 distfiles="https://librewolf.dev/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=3379dabbd1b9b2f74db846ac62f49b0e52529ddd4f3dbfd50de088abcb47e951
+checksum=63d5d69c4f458e1a26ce0974f3ce43c46345d912452c1562157150f71117f3a9
 
 lib32disabled=yes
 
@@ -242,8 +242,8 @@ do_build() {
 		LD_LIBRARY_PATH="$PWD/obj/dist/firefox" \
 		XDG_RUNTIME_DIR="$(mktemp -d "${wrksrc}/pgo-runtime-XXXXXX")" \
 		MOZ_ENABLE_WAYLAND=0 \
-			xvfb-run -s "-screen 0 1920x1080x24 -nolisten local" \
-			dbus-run-session -- ./mach python build/pgo/profileserver.py
+		xvfb-run -s "-screen 0 1920x1080x24 -nolisten local" \
+		dbus-run-session -- ./mach python build/pgo/profileserver.py
 
 		test -s merged.profdata
 		test -s jarlog
@@ -261,7 +261,6 @@ do_build() {
 
 	./mach build
 }
-
 do_install() {
 	export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system
 	export MOZBUILD_STATE_PATH="${wrksrc}/mozbuild"
