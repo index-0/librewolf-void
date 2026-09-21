@@ -89,14 +89,13 @@ jobs:
       - name: copy librewolf into srcpkgs
         run: cp -rv librewolf/srcpkgs/librewolf void-packages/srcpkgs
 
-      - name: cache xbps source state
+      - name: cache dependency sources
         uses: actions/cache@v6
         with:
-          path: void-packages/hostdir
-          key: ${{ runner.os }}-x86_64-musl-hostdir-${{ steps.void_revision.outputs.sha }}-${{ hashFiles('librewolf/srcpkgs/librewolf/template') }}
+          path: void-packages/hostdir/sources
+          key: ${{ runner.os }}-x86_64-musl-sources
           restore-keys: |
-            ${{ runner.os }}-x86_64-musl-hostdir-${{ steps.void_revision.outputs.sha }}-
-            ${{ runner.os }}-x86_64-musl-hostdir-
+            ${{ runner.os }}-x86_64-musl-sources
 
       - name: cache xbps build state
         uses: actions/cache@v6
