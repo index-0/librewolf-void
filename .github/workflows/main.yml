@@ -7,8 +7,6 @@ concurrency:
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
-      - '**'
     tags:
       - '*'
 
@@ -220,7 +218,7 @@ jobs:
           }
           xbps-rindex -r "$PWD"
           xbps-rindex -s --signedby "${{ vars.SIGNEDBY }}" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") "$PWD"
-          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") "${librewolf_pkgs[0]}"
+          xbps-rindex -S -f --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") "${librewolf_pkgs[0]}"
           xbps-rindex -c "$PWD"
 
       - name: prepare simple package name
