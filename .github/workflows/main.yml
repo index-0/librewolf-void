@@ -37,7 +37,10 @@ jobs:
           _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
           : "${version:?}" "${_rev:?}"
           gh release view "${TAG}" >/dev/null 2>&1 && exit 0
-          gh release create "${TAG}"             --title "librewolf ${TAG}"             --notes "https://librewolf.dev/librewolf/source/releases/tag/${version}-${_rev}"             --latest=false
+          gh release create "${TAG}" \
+            --title "librewolf ${TAG}" \
+            --notes "https://librewolf.dev/librewolf/source/releases/tag/${version}-${_rev}" \
+            --latest=false
 
   build:
     strategy:
@@ -111,6 +114,7 @@ jobs:
           tar xvf .cache/xbps-static.tar.xz -C /opt/xbps
 
       - name: build
+        id: build
         env:
           XBPS_TARGET_ARCH: ${{ matrix.target }}
           XBPS_TARGET_MACHINE: x86_64-musl
@@ -136,7 +140,10 @@ jobs:
           : "${current_version:?}" "${current_source:?}"
 
           if [ -d hostdir/sources ]; then
-            find hostdir/sources -maxdepth 1 -type f               -name 'librewolf-*.source.tar.gz'               ! -name "$current_source"               -delete || true
+            find hostdir/sources -maxdepth 1 -type f \
+              -name 'librewolf-*.source.tar.gz' \
+              ! -name "$current_source" \
+              -delete || true
           fi
 
           if [ -d hostdir/binpkgs ]; then
@@ -144,7 +151,8 @@ jobs:
           fi
 
           if [ -d masterdir/builddir ]; then
-            find masterdir/builddir -mindepth 1 -maxdepth 1 -type d               -name 'librewolf-*' -exec rm -rf -- {} + 2>/dev/null || true
+            find masterdir/builddir -mindepth 1 -maxdepth 1 -type d \
+              -name 'librewolf-*' -exec rm -rf -- {} + 2>/dev/null || true
           fi
 
           free_kb=$(df --output=avail / | tail -n 1 | tr -d ' ')
@@ -157,7 +165,7 @@ jobs:
           df -h / | tail -n 1
 
       - name: sign
-        if: ${{ success() }}
+        if: ${{ steps.build.outcome == 'success' }}
         env:
           XBPS_PASSPHRASE: ${{ secrets.SIGN_PASS }}
           XBPS_TARGET_ARCH: ${{ matrix.target }}
@@ -171,7 +179,7 @@ jobs:
           xbps-rindex -c "$PWD"
 
       - name: prepare simple package name
-        if: ${{ success() }}
+        if: ${{ steps.build.outcome == 'success' }}
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           set -eu
@@ -183,7 +191,7 @@ jobs:
           echo "LIBREWOLF_VERSION=${version}" >> "$GITHUB_ENV"
 
       - name: package sanity test
-        if: ${{ success() }}
+        if: ${{ steps.build.outcome == 'success' }}
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           set -eu
@@ -198,7 +206,7 @@ jobs:
           cmp -s "${generated}.sig2" "$sig"
 
       - name: checksum
-        if: ${{ success() }}
+        if: ${{ steps.build.outcome == 'success' }}
         working-directory: void-packages/hostdir/binpkgs/
         run: |
           set -eu
@@ -206,7 +214,7 @@ jobs:
           sha512sum "librewolf-${LIBREWOLF_VERSION}.xbps"
 
       - name: validate upload tag
-        if: ${{ success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.build.outcome == 'success' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         run: |
           set -eu
           version=$(sed -n 's/^version=//p' librewolf/srcpkgs/librewolf/template)
@@ -215,14 +223,17 @@ jobs:
           [ "${GITHUB_REF_NAME}" = "${expected}" ]
 
       - name: upload assets
-        if: ${{ success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.build.outcome == 'success' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         working-directory: void-packages/hostdir/binpkgs/
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -eu
-          gh release upload "${{ github.ref_name }}"             "librewolf-${LIBREWOLF_VERSION}.xbps"             "librewolf-${LIBREWOLF_VERSION}.xbps.sig2"             --clobber
+          gh release upload "${{ github.ref_name }}" \
+            "librewolf-${LIBREWOLF_VERSION}.xbps" \
+            "librewolf-${LIBREWOLF_VERSION}.xbps.sig2" \
+            --clobber
 
       - name: cleanup release package artifacts
         if: ${{ always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
@@ -239,7 +250,7 @@ jobs:
           df -h / | tail -n 1
   latest:
     needs: [release, build]
-    if: ${{ success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ steps.build.outcome == 'success' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - name: mark release as latest
