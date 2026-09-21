@@ -140,7 +140,7 @@ jobs:
           template="../librewolf/srcpkgs/librewolf/template"
           current_version=$(sed -n 's/^version=//p' "$template")
           current_revision=$(sed -n 's/^revision=//p' "$template")
-          current_source=$(sed -n 's#^distfiles=.*librewolf-\([^/]*\)\.source\.tar\.gz.*#librewolf-\1.source.tar.gz#p' "$template")
+          current_source="librewolf-${current_version}-${current_revision}.source.tar.gz"
           : "${current_version:?}" "${current_revision:?}" "${current_source:?}"
 
           if [ -d hostdir/sources ]; then
