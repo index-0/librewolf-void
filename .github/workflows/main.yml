@@ -204,9 +204,17 @@ jobs:
         run: |
           set -eu
           export PATH="/opt/xbps/usr/bin/:$PATH"
+          version=$(sed -n 's/^version=//p' ../../../librewolf/srcpkgs/librewolf/template)
+          revision=$(sed -n 's/^revision=//p' ../../../librewolf/srcpkgs/librewolf/template)
+          mapfile -t librewolf_pkgs < <(find . -maxdepth 1 -type f -name "librewolf-${version}_${revision}.*.xbps" -print)
+          [ "${#librewolf_pkgs[@]}" -eq 1 ] || {
+            printf 'Expected exactly one LibreWolf package to sign for %s-%s, found %s
+' "$version" "$revision" "${#librewolf_pkgs[@]}"
+            exit 1
+          }
           xbps-rindex -r "$PWD"
           xbps-rindex -s --signedby "${{ vars.SIGNEDBY }}" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") "$PWD"
-          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") ./*.xbps
+          xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") "${librewolf_pkgs[0]}"
           xbps-rindex -c "$PWD"
 
       - name: prepare simple package name
