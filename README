@@ -5,31 +5,26 @@ provides prebuilt packages for librewolf.
 
 Installing
 ----------
-There are two options: use the repository for automatic updates, or install
-the package manually with each release.
+Download the release package for x86_64-musl:
 
-* Option 1. Repository
-Create the file `/etc/xbps.d/20-librewolf.conf` with the following content:
-repository=https://github.com/index-0/librewolf-void/releases/latest/download/
+librewolf-<version>.xbps
 
-Lastly, install with:
-# xbps-install -Su librewolf
+Then install it with:
+# xbps-install ./librewolf-<version>.xbps
 
-* Option 2. Manual installation
-Download a release (*.xbps) into an empty folder, then run:
-$ cd <folder>
-$ xbps-rindex -a librewolf-<version>_<revision>.<arch>.xbps
-# xbps-install -R $PWD librewolf
+The package is intentionally built only for x86_64-musl and is tuned for
+Intel Skylake-class CPUs, including the i3-6100U. It is not intended for
+older or non-Skylake x86-64 CPUs.
 
 Building
 --------
-Clone `void-packages` and bootstrap for x86_64-musl:
+Clone void-packages and bootstrap for x86_64-musl:
 $ git clone https://github.com/void-linux/void-packages
 $ cd void-packages
 $ ./xbps-src -A x86_64-musl binary-bootstrap
 
-Clone this repository and copy the `librewolf-void/srcpkgs/librewolf` folder
-into `void-packages/srcpkgs`, then run:
+Clone this repository and copy the librewolf-void/srcpkgs/librewolf folder
+into void-packages/srcpkgs, then run:
 $ ./xbps-src pkg -j4 -A x86_64-musl librewolf
 
 Lastly, install with:
@@ -37,23 +32,18 @@ Lastly, install with:
 
 Build target and optimization
 ----------------------------
-This repository intentionally builds only `x86_64-musl`. The package is tuned
-for Intel Skylake-class CPUs, including the i3-6100U, with Clang, `-O3`,
-`-march=skylake`, `-mtune=skylake`, LTO, PGO, and single-codegen-unit Rust
-optimization. These packages are not intended for older x86-64 CPUs.
-
-Note:
-If your `void-packages` or bootstrap is stale, update first:
-$ cd void-packages
-$ git pull origin master
-$ ./xbps-src bootstrap-update
+This repository intentionally builds only x86_64-musl. The package is tuned
+for Intel Skylake-class CPUs, including the i3-6100U, with Clang, -O3,
+-march=skylake, -mtune=skylake, LTO, PGO, and single-codegen-unit Rust
+optimization.
 
 Integrity
 ---------
-The build process is fully transparent and package integrity can be verified
-using the checksums displayed in the GitHub Actions build logs.
+The source archive is pinned by SHA256 in the package template. Release
+packages are also accompanied by a .sig2 signature.
 
-Verify a downloaded package against the log:
-$ sha256sum librewolf-<version>_<revision>.<arch>.xbps
+For a downloaded package:
+$ sha256sum librewolf-<version>.xbps
 
-This manual check is necessary for integrity as GitHub Releases are mutable.
+For the strongest verification, compare the result with the checksum
+published by the release workflow.
