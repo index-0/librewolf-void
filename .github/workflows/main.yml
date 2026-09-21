@@ -36,7 +36,7 @@ jobs:
         run: |
           version=$(sed -n 's/^version=//p' srcpkgs/librewolf/template)
           _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
-          : "${version:?}" "${revision:?}" "${pkg:?}"
+          : "${version:?}" "${_rev:?}"
           gh release view "${TAG}" >/dev/null 2>&1 && exit 0
           gh release create "${TAG}" \
             --title "librewolf ${TAG}" \
@@ -220,6 +220,7 @@ jobs:
           xbps-rindex -c "$PWD"
           generated=$(find . -maxdepth 1 -type f -name "librewolf-${LIBREWOLF_VERSION}_${LIBREWOLF_REVISION}.*.xbps" -print -quit)
           test -n "$generated"
+          cmp -s "$generated" "$pkg"
           cmp -s "${generated}.sig2" "$sig"
 
       - name: checksum
