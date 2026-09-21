@@ -54,7 +54,7 @@ jobs:
       - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: ${{ github.sha }}
           path: librewolf
       - name: checkout void-packages
         uses: actions/checkout@v4
@@ -89,17 +89,29 @@ jobs:
           xbps-rindex -s --signedby "${{ vars.SIGNEDBY }}" --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") $PWD
           xbps-rindex -S --privkey <(printf '%s' "${{ secrets.PRIV_KEY }}") *.xbps
           xbps-rindex -c $PWD
+      - name: prepare simple package name
+        working-directory: void-packages/hostdir/binpkgs/
+        run: |
+          version=$(sed -n 's/^version=//p' ../../../../librewolf/srcpkgs/librewolf/template)
+          pkg=$(printf '%s\n' librewolf-${version}_*.xbps | head -n1)
+          : "${pkg:?}"
+          cp "$pkg" "librewolf-${version}.xbps"
+          cp "${pkg}.sig2" "librewolf-${version}.xbps.sig2"
       - name: checksum
         working-directory: void-packages/hostdir/binpkgs/
         run: |
-          sha256sum $(echo *.xbps)
-          sha512sum $(echo *.xbps)
+          sha256sum librewolf-*.xbps
+          sha512sum librewolf-*.xbps
       - name: upload assets
         working-directory: void-packages/hostdir/binpkgs/
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release upload "${{ github.ref_name }}" *.xbps *.xbps.sig2 *-repodata --clobber
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            "librewolf-${{ github.ref_name#librewolf- }}.xbps" \
+            "librewolf-${{ github.ref_name#librewolf- }}.xbps.sig2" \
+            --clobber
   latest:
     needs: build
     runs-on: ubuntu-latest
