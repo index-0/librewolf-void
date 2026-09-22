@@ -294,6 +294,27 @@ jobs:
           cmp -s "$generated" "$pkg"
           cmp -s "${generated}.sig2" "$sig"
 
+      - name: verify Wayland-only binary
+        if: ${{ steps.build.outcome == 'success' }}
+        working-directory: void-packages/hostdir/binpkgs/
+        run: |
+          set -eu
+          pkg="librewolf-${LIBREWOLF_VERSION}.xbps"
+          root="$(mktemp -d)"
+          trap 'rm -rf "$root"' EXIT
+          tar -xf "$pkg" -C "$root"
+
+          for name in libxul.so libmozgtk.so; do
+            file="$(find "$root/usr/lib/librewolf" -type f -name "$name" -print -quit)"
+            test -n "$file"
+            echo "Checking $file"
+            if readelf -d "$file" 2>/dev/null |
+              grep -Eq 'Shared library: [(libX11\.so|libxcb\.so|libXext\.so|libXrender\.so|libXfixes\.so|libXi\.so|libXrandr\.so|libXcursor\.so|libXdamage\.so|libXcomposite\.so|libXinerama\.so|libXtst\.so|libXss\.so|libXau\.so|libXdmcp\.so)'; then
+              echo "X11 library dependency detected in $file"
+              exit 1
+            fi
+          done
+
       - name: checksum
         if: ${{ steps.build.outcome == 'success' }}
         working-directory: void-packages/hostdir/binpkgs/
