@@ -48,7 +48,7 @@ jobs:
           _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
           expected_tag="${version}-${_rev}"
           echo "expected_tag=${expected_tag}" >> "$GITHUB_OUTPUT"
-          if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = refs/tags/* ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
             [ "${TAG}" = "${expected_tag}" ] || {
               echo "Release tag ${TAG} does not match package version ${expected_tag}"
               exit 1
@@ -355,10 +355,17 @@ jobs:
           [ "${#sigs[@]}" -eq 1 ] || exit 1
           pkg_version=${pkgs[0]#./librewolf-}
           pkg_version=${pkg_version%.xbps}
-          [ "${pkg_version}-${EXPECTED_TAG#*-}" = "${GITHUB_REF_NAME}" ] || {
-            echo "Artifact version does not match release tag"
+          [ "${GITHUB_REF_NAME}" = "${EXPECTED_TAG}" ] || {
+            echo "Release tag does not match the validated tag"
             exit 1
           }
+          case "${EXPECTED_TAG}" in
+            "${pkg_version}"-*) ;;
+            *)
+              echo "Artifact version ${pkg_version} does not match release tag ${EXPECTED_TAG}"
+              exit 1
+              ;;
+          esac
 
       - name: create release and upload assets
         env:
