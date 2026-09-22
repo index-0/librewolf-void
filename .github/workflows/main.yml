@@ -6,6 +6,12 @@ concurrency:
 
 on:
   workflow_dispatch:
+    inputs:
+      confirm_build:
+        description: "Run the LibreWolf build"
+        required: true
+        default: true
+        type: boolean
   push:
     tags:
       - '*'
