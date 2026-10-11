@@ -26,7 +26,7 @@ makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  $(vopt_if alsa alsa-lib-devel) $(vopt_if dbus dbus-glib-devel)
  $(vopt_if pulseaudio pulseaudio-devel) $(vopt_if xscreensaver libXScrnSaver-devel)
  $(vopt_if sndio sndio-devel) $(vopt_if jack jack-devel)"
-depends="nss>=3.129 nspr>=4.30 desktop-file-utils hicolor-icon-theme pciutils"
+depends="nss>=3.129 nspr>=4.39 desktop-file-utils hicolor-icon-theme pciutils"
 
 build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi debug"
 build_options_default="alsa jack dbus pulseaudio xscreensaver sndio wayland clang wasi"
