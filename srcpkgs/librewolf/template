@@ -1,6 +1,6 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=157.0.1
+version=158.0
 revision=1
 _rev=1
 wrksrc=${pkgname}-${version}-${_rev}
@@ -10,7 +10,7 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.dev"
 distfiles="https://librewolf.dev/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=4b363d2c85eda694c671bda98fc1f0a0ad9cfa030c975ae4fd0e1092a3f59eb2
+checksum=ea2424fb4c02916c0c531210f1dd8b460e85074f2d8ca0529d49553d36dd13c0
 
 lib32disabled=yes
 
@@ -26,7 +26,7 @@ makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  $(vopt_if alsa alsa-lib-devel) $(vopt_if dbus dbus-glib-devel)
  $(vopt_if pulseaudio pulseaudio-devel) $(vopt_if xscreensaver libXScrnSaver-devel)
  $(vopt_if sndio sndio-devel) $(vopt_if jack jack-devel)"
-depends="nss>=3.129 nspr>=4.39 desktop-file-utils hicolor-icon-theme pciutils"
+depends="nss>=3.129 nspr>=4.39 desktop-file-utils hicolor-icon-theme pciutils libavcodec6"
 
 build_options="alsa jack dbus pulseaudio xscreensaver sndio wayland lto pgo clang wasi debug"
 build_options_default="alsa jack dbus pulseaudio xscreensaver sndio wayland clang wasi"
