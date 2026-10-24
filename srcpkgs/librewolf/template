@@ -1,8 +1,8 @@
 # Template file for 'librewolf'
 pkgname=librewolf
-version=158.0
+version=158.0.1
 revision=1
-_rev=1
+_rev=2
 wrksrc=${pkgname}-${version}-${_rev}
 build_helper="rust"
 short_desc="LibreWolf web browser"
@@ -10,15 +10,15 @@ maintainer="index <index@mailbox.org>"
 license="GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage="https://librewolf.dev"
 distfiles="https://librewolf.dev/api/packages/librewolf/generic/librewolf-source/${version}-${_rev}/${pkgname}-${version}-${_rev}.source.tar.gz"
-checksum=ea2424fb4c02916c0c531210f1dd8b460e85074f2d8ca0529d49553d36dd13c0
+checksum=dd1e782faf8e8da53267997c79f6b5c330ca0ca1cf1818c6d6faaeb08642f7db
 
 lib32disabled=yes
 
-_llvmver=22
+_llvmver=23
 hostmakedepends="unzip zip pkg-config perl python3 yasm rust
  cargo llvm${_llvmver} clang${_llvmver} lld${_llvmver} nodejs cbindgen nasm which
  tar xz $(vopt_if pgo 'xvfb-run dbus mesa-dri vulkan-loader pciutils')
- $(vopt_if wasi wasi-sdk)"
+ $(vopt_if wasi wasi-sdk) libclang${_llvmver}"
 makedepends="nss-devel libjpeg-turbo-devel gtk+3-devel
  pixman-devel libevent-devel libnotify-devel libwebp-devel
  libXrender-devel libXcomposite-devel libSM-devel libXt-devel rust-std
