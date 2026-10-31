@@ -10,16 +10,15 @@ the package manually with each release.
 
 * Option 1. Repository
 Create the file `/etc/xbps.d/20-librewolf.conf` with the following content:
-repository=https://github.com/index-0/librewolf-void/releases/latest/download/
+repository=https://github.com/index-0/librewolf-void/releases/latest/download
 
 Lastly, install with:
 # xbps-install -Su librewolf
 
 * Option 2. Manual installation
-Download a release (*.xbps) into an empty folder, then run:
-$ cd <folder>
-$ xbps-rindex -a librewolf-<version>_<revision>.<arch>.xbps
-# xbps-install -R $PWD librewolf
+Install a specific release without adding the repository:
+# xbps-install -SR \
+  https://github.com/index-0/librewolf-void/releases/download/<tag> librewolf
 
 Building
 --------
