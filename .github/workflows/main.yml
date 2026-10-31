@@ -6,29 +6,10 @@ on:
       - '*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout librewolf-void
-        uses: actions/checkout@v4
-      - name: create release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          version=$(sed -n 's/^version=//p' srcpkgs/librewolf/template)
-          _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
-          : "${version:?}" "${_rev:?}"
-          gh release view "$TAG" >/dev/null 2>&1 && exit 0
-          gh release create "$TAG" \
-            --title "librewolf $TAG" \
-            --notes "https://librewolf.dev/librewolf/source/releases/tag/${version}-${_rev}" \
-            --latest=false
   build:
-    needs: release
     strategy:
       max-parallel: 4
       matrix:
@@ -57,7 +38,6 @@ jobs:
       - name: checkout librewolf-void
         uses: actions/checkout@v4
         with:
-          ref: master
           path: librewolf
       - name: checkout void-packages
         uses: actions/checkout@v4
@@ -102,18 +82,36 @@ jobs:
         run: |
           sha256sum $(echo *.xbps)
           sha512sum $(echo *.xbps)
-      - name: upload assets
-        working-directory: void-packages/hostdir/binpkgs/
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: gh release upload "${{ github.ref_name }}" *.xbps *.xbps.sig2 *-repodata --clobber
-  latest:
+      - name: upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            void-packages/hostdir/binpkgs/*.xbps
+            void-packages/hostdir/binpkgs/*.xbps.sig2
+            void-packages/hostdir/binpkgs/*-repodata
+  release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: mark release as latest
+      - name: checkout librewolf-void
+        uses: actions/checkout@v4
+      - name: download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: create release
         env:
           GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: gh release edit "${{ github.ref_name }}" --latest
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -n 's/^version=//p' srcpkgs/librewolf/template)
+          _rev=$(sed -n 's/^_rev=//p' srcpkgs/librewolf/template)
+          : "${version:?}" "${_rev:?}"
+          gh release create "$TAG" dist/* \
+            --title "librewolf $TAG" \
+            --notes "https://librewolf.dev/librewolf/source/releases/tag/${version}-${_rev}" \
+            --latest
