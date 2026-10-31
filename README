@@ -43,8 +43,10 @@ $ ./xbps-src bootstrap-update
 Integrity
 ---------
 The build process is fully transparent and package integrity can be verified
-using the checksums displayed in the GitHub Actions build logs. Releases are
-immutable, so published packages cannot be replaced.
+using signed attestations of the workflow run that built each package.
 
-Verify a downloaded package against the log:
-$ sha256sum librewolf-<version>_<revision>.<arch>.xbps
+Verify a downloaded package:
+$ gh attestation verify -R index-0/librewolf-void \
+    librewolf-<version>_<revision>.<arch>.xbps
+
+Releases are immutable, so published packages cannot be replaced.
